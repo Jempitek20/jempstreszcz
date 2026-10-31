@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>jempstreszcz.pl – streszczenia lektur</title>
+<style>
+:root{--bg:#f5f0e6;--fg:#1d1b18;--mut:#8a8374;--line:#d9d1bf;--card:transparent;--acc:#6b2d2d}
+@media(prefers-color-scheme:dark){:root{--bg:#16140f;--fg:#ece5d6;--mut:#8f8877;--line:#332f26;--card:transparent;--acc:#c98a7a}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:Georgia,'Times New Roman',serif}
+header{max-width:680px;margin:0 auto;padding:64px 24px 28px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:1px solid var(--fg)}
+h1{font-size:2.6rem;margin:0;letter-spacing:-.02em;font-weight:400}h1 span{color:var(--acc);font-style:italic}
+.sub{color:var(--mut);margin:10px 0 0;font-style:italic;font-size:1rem}
+main{max-width:680px;margin:0 auto;padding:8px 24px 80px;counter-reset:n}
+button,input{font:inherit;font-family:system-ui,sans-serif}
+.btn{border:1px solid var(--fg);background:transparent;color:var(--fg);padding:7px 16px;border-radius:0;cursor:pointer;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;display:inline-block;transition:.15s}
+.btn:hover{background:var(--fg);color:var(--bg)}.btn.ghost{border-color:var(--line);color:var(--mut)}.btn.ghost:hover{border-color:var(--fg);color:var(--bg)}.btn.sm{padding:7px 14px}
+input[type=text],input[type=password],input[type=search]{width:100%;padding:10px 0;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;color:var(--fg);margin-bottom:12px;outline:0;font-family:Georgia,serif;font-size:1rem}
+input:focus{border-bottom-color:var(--fg)}
+#q{margin:24px 0 8px;font-style:italic}
+.item{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px 0;border-bottom:1px solid var(--line);counter-increment:n}
+.item::before{content:counter(n,decimal-leading-zero);color:var(--mut);font-size:.8rem;font-family:system-ui,sans-serif;letter-spacing:.1em;width:28px;flex-shrink:0}
+.item>div:first-child{flex:1}
+.item b{font-size:1.3rem;font-weight:400}.item small{display:block;color:var(--mut);font-family:system-ui,sans-serif;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;margin-top:5px}
+.acts{display:flex;gap:8px;flex-shrink:0}.empty{color:var(--mut);text-align:center;padding:60px 0;font-style:italic}
+.panel{border:1px solid var(--line);padding:20px;margin:24px 0 0;font-family:system-ui,sans-serif;font-size:.85rem;background:rgba(127,127,127,.05)}
+dialog{border:1px solid var(--fg);border-radius:0;background:var(--bg);color:var(--fg);width:min(340px,90vw);padding:28px}
+dialog h3{font-weight:400;font-size:1.4rem}dialog::backdrop{background:#0007}.err{color:var(--acc);font-size:.8rem;min-height:1.2em;font-family:system-ui,sans-serif}
+
+body{background-image:radial-gradient(rgba(120,100,60,.07) 1px,transparent 1px);background-size:5px 5px}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+header,#q,.panel{animation:up .6s both}
+.item{animation:up .6s both;position:relative;transition:padding .25s}
+.item:nth-child(2){animation-delay:.05s}.item:nth-child(3){animation-delay:.1s}.item:nth-child(4){animation-delay:.15s}.item:nth-child(n+5){animation-delay:.2s}
+.item::after{content:"";position:absolute;left:-14px;top:22px;bottom:22px;width:3px;background:var(--acc);transform:scaleY(0);transform-origin:top;transition:transform .25s}
+.item:hover::after{transform:scaleY(1)}.item:hover b{color:var(--acc)}.item b{transition:color .2s}
+.btn:not(.ghost){background:var(--fg);color:var(--bg)}.btn:not(.ghost):hover{background:var(--acc);border-color:var(--acc);color:#fff}
+h1::after{content:"❦";display:block;font-size:.9rem;color:var(--mut);margin-top:8px;font-style:normal}
+footer{max-width:680px;margin:0 auto;padding:0 24px 48px;text-align:center;color:var(--mut);font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;font-family:system-ui,sans-serif}
+dialog[open]{animation:up .25s both}
+</style></head><body>
+<header><div><h1>jemp<span>streszcz</span>.pl</h1><p class="sub">Księgarnia streszczeń. Wszystko do pobrania, za darmo.</p></div>
+<button class="btn ghost sm" id="loginBtn">Admin</button></header>
+<main>
+<div class="panel" id="admin" hidden>
+<input type="text" id="title" placeholder="Tytuł lektury, np. Hobbit">
+<input type="file" id="file" accept="application/pdf" style="margin-bottom:10px">
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn sm" id="up">Dodaj PDF</button>
+<button class="btn ghost sm" id="exp">⬇ Pobierz gotową stronę</button><span class="err" id="upmsg"></span></div>
+<p style="color:var(--mut);margin:10px 0 0">Zmiany widzisz tylko Ty, dopóki nie klikniesz „Pobierz gotową stronę" i nie wrzucisz nowego index.html na Netlify (przeciągnij na app.netlify.com/drop).</p></div>
+<input type="search" id="q" placeholder="Szukaj lektury…">
+<div id="list"></div></main>
+<footer>jempstreszcz.pl · ściągi bez stresu</footer>
+<dialog id="dlg"><form id="lf"><h3 style="margin-top:0">Logowanie</h3>
+<input type="text" id="u" placeholder="Login" autocomplete="username">
+<input type="password" id="p" placeholder="Hasło" autocomplete="current-password">
+<div class="err" id="lerr"></div><div style="display:flex;gap:8px"><button class="btn" type="submit">Zaloguj</button><button class="btn ghost" type="button" id="cancel">Anuluj</button></div></form></dialog>
+<script id="data" type="application/json">[]</script>
+<script>
+const HASH="5df62c9c4ca065d7607ccc2054f2be7b7a75d104e8c0553adc4e2d4ae6d0db13";
+const $=id=>document.getElementById(id);
+let items=JSON.parse($("data").textContent),admin=sessionStorage.getItem("adm")==="1";
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const sha=async s=>[...new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s)))].map(b=>b.toString(16).padStart(2,"0")).join("");
+function render(){$("admin").hidden=!admin;$("loginBtn").textContent=admin?"Wyloguj":"Admin";
+const f=$("q").value.toLowerCase(),r=items.filter(i=>i.title.toLowerCase().includes(f));
+$("list").innerHTML=r.length?r.map(i=>`<div class="item"><div><b>${esc(i.title)}</b><small>PDF · ${(i.size/1048576).toFixed(1)} MB</small></div><div class="acts"><button class="btn sm" data-g="${i.id}">Pobierz</button>${admin?`<button class="btn ghost sm" data-d="${i.id}">Usuń</button>`:""}</div></div>`).join(""):'<div class="empty">Na razie nic tu nie ma.</div>'}
+function blobOf(b64){const bin=atob(b64),a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);return new Blob([a],{type:"application/pdf"})}
+function save(blob,name){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000)}
+$("q").oninput=render;
+$("loginBtn").onclick=()=>{if(admin){admin=false;sessionStorage.removeItem("adm");render()}else{$("lerr").textContent="";$("dlg").showModal()}};
+$("cancel").onclick=()=>{$("p").value="";$("dlg").close()};
+$("lf").onsubmit=async e=>{e.preventDefault();
+if(await sha($("u").value+":"+$("p").value)!==HASH){$("lerr").textContent="Zły login lub hasło";return}
+admin=true;sessionStorage.setItem("adm","1");$("p").value="";$("dlg").close();render()};
+$("up").onclick=async()=>{const t=$("title").value.trim(),f=$("file").files[0],m=$("upmsg");
+if(!t||!f){m.textContent="Podaj tytuł i wybierz PDF";return}
+const data=await new Promise(r=>{const x=new FileReader();x.onload=()=>r(x.result.split(",")[1]);x.readAsDataURL(f)});
+items.push({id:crypto.randomUUID(),title:t,size:f.size,data});items.sort((a,b)=>a.title.localeCompare(b.title,"pl"));
+$("title").value="";$("file").value="";m.textContent="Dodano. Pobierz gotową stronę, żeby opublikować.";render()};
+$("exp").onclick=()=>{const c=document.documentElement.cloneNode(true);
+c.querySelector("#data").textContent=JSON.stringify(items).replace(/</g,"\\u003c");
+c.querySelector("#list").innerHTML="";c.querySelector("#admin").setAttribute("hidden","");
+save(new Blob(["<!doctype html>\n"+c.outerHTML],{type:"text/html"}),"index.html")};
+$("list").onclick=e=>{const g=e.target.dataset.g,d=e.target.dataset.d;
+if(g){const i=items.find(x=>x.id===g);save(blobOf(i.data),i.title+".pdf")}
+if(d&&confirm("Usunąć?")){items=items.filter(x=>x.id!==d);render()}};
+render();
+</script></body></html>
